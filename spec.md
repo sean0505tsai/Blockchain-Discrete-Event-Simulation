@@ -1,262 +1,261 @@
-# Bitcoin Network Simulation Specification Version B
+# Bitcoin Network Simulation Spec (Implementation Ready)
 
-MMnL model of modeling blockchain
-Ver.B Proof-of-Work (PoW) competition
-這是一個離散事件模擬，使用下一事件推進法來模擬比特幣網路的運作  
-模擬真實比特幣的運作方式，礦工競爭來獲得區塊獎勵，但沿用論文的1000個伺服器和144個區塊的設定。
+版本: B (PoW competition)
+模型: 離散事件模擬 (Next-Event Time Advance)
+核心原則: mempool 與區塊打包皆以交易大小 (vB) 為基礎，不以交易筆數上限為基礎。
 
-## 系統規格
+## 1. 目標與範圍
 
-- Mean Inter-arrival Time: 1/3.147 (seconds per transaction) *[可從input讀取]*
-- Mean Service Time per Server: 600000 (seconds) *[可從input讀取]*
-- Number of Servers: 1000
-- Number of Blocks to Simulate: **動態読取** (N + 10，玫機10 + 統計N) *[可從input讀取]*
-- Mempool Capacity: **動態** (読input) *[可從input讀取]*
-- Max Transactions per Block: **動態** (読input) *[可從input讀取]*
-- Queue Policy: First-Come-First-Serve (FCFS)
-- **Block Generation Trigger: when the miner with the lowest service time completes a block**
+模擬比特幣網路中 1000 個礦工的 PoW 競爭與區塊生成流程，輸出每個統計區塊的:
 
-## 系統架構及行為
+- 區塊生成間隔 (秒)
+- 區塊交易筆數
+- 區塊交易總大小
+- 交易丟棄統計
 
-incoming transactions -> waiting queue(capacity: 3000) -> servers(1000 parallel) -> new block generation -> output
+## 2. 輸入
 
-### Initialization
+檔案: mmnl_pow.in  
+格式:  
+`mean_interarrival mean_service_time queue_capacity max_block_size num_blocks_to_simulate`
 
-t=0時，系統開始運行（冷啟動處理空區塊）:
+範例:
+0.3177 600000 300000000 1000000 2016
 
-- waiting queue為空
-- 所有礦工(server)初始設為BUSY狀態（處理空區塊）
-- 已完成的區塊數量為0
-- `time_last_event` = 0（用於計算區間統計）
-- `last_block_time` = 0（上一區塊生成時刻）
-- 設定交易的到達時間，該時間以指數分布mean=1/3.147秒設定
-- 以迴圈為所有礦工以指數分布mean=600000設定第一次完工時間並更新至 `time_next_event[2]`
-- **說明**：冷啟動時礦工處理空區塊，這與真實比特幣系統中礦工持續運作的行為一致
+參數說明:
 
-### 主迴圈&推進機制
+- mean_interarrival: 交易到達平均間隔秒數
+- mean_service_time: 單一礦工每輪競爭完成時間之指數分布平均值 (秒)
+- queue_capacity: mempool 容量上限 (vB)
+- max_block_size: 每個區塊可打包交易總大小上限 (vB)
+- num_blocks_to_simulate: 統計區塊數 N (不含暖機)
 
-- 本系統採用「下一事件時間推進法 (Next-Event Time Advance)」，嚴禁使用逐秒/固定步長輪詢 (Polling)。
-- 系統必須維護一個未來事件列表 (Future Event List, FEL) 陣列 `time_next_event`，長度為 2：
-  - `time_next_event[1]`: 下一次交易抵達時間 (Arrival)
-  - `time_next_event[2]`: 1000個礦工中，最早完成交易處理的時間 (Departure)
-- **區塊生成由 Departure 事件觸發：** 當最早完成交易處理的礦工完成區塊時，觸發區塊生成事件
+固定值:
 
-#### 執行迴圈
+- num_servers = 1000
+- warmup_blocks = 10
+- total_blocks = N + warmup_blocks
 
-當已完成的區塊數量小於 154 時，持續執行以下步驟：
+## 3. 狀態與資料結構
 
-**區塊編號說明**：
-- 總模擬：154個區塊（區塊 #1~#154）
-- 暖機階段：前10個區塊（#1~#10），不計入統計
-- 統計範圍：區塊 #11~#154，重新編號為 1~144
+必要狀態變數:
 
-1. **時間推進 (Timing Function):**
-   - 找出 `time_next_event` 陣列中數值最小且大於 0 的時間點，將系統虛擬時鐘 `sim_time` 直接跳躍至該時間。
-   - 依據與上一次事件的時間差 (`sim_time - time_last_event`)，更新全網礦工忙碌時間面積（用於計算 Utilization）與佇列長度面積統計。更新後將 `time_last_event` 設為 `sim_time`。
+- sim_time: 目前模擬時間
+- time_last_event: 上次事件時間
+- last_block_time: 上一個區塊生成時間
+- block_count_total: 已生成區塊數 (含暖機)
 
-2. **事件分流處理 (Event Handlers):**
+事件時間:
 
-   - **狀況 1：若下一個事件為「交易抵達 (Arrival)」：**
-     - 如果區塊 >= #11（統計範圍）：將此交易計入 `total_arrived_transactions` 統計。
-     - 依據卜瓦松分佈 (Mean = mean_interarrival) 產生隨機數，安排下一次交易抵達時間並更新至 `time_next_event[1]`。
-     - 檢查mempool是否已滿（當前佇列長度 >= queue_capacity）：
-       - 如果未滿：將當前交易加入等待佇列 (Mempool)。
-       - 如果已滿：直接丟棄該交易，但只在區塊 #11~#154 時計入 `dropped_transactions` 統計（前10個區塊丟棄的交易不記錄）。
-  
-   - **狀況 2：若下一個事件為「礦工完成交易處理 (Departure)」：**
-     - 觸發區塊生成事件
-     - **區塊打包**：從mempool中取出最多 `max_transactions_per_block` 條交易，記錄取出的交易數量作為該區塊的交易數
-       - `transactions_in_block = min(num_in_mempool, max_transactions_per_block)`
-       - 更新mempool：`num_in_mempool -= transactions_in_block`
-     - **所有礦工重新分配**：無論隊列是否有交易（允許空區塊），設定所有礦工回到BUSY狀態（`num_busy_servers` = 1000），並以迴圈為每個礦工獨立設定指數分布mean=600000隨機產生服務時間，記錄各礦工在本區塊時間區間內的忙碌時長
-     - 更新 `time_next_event[2]` 為全網最早完工
+- time_next_arrival
+- time_next_departure
 
-### Transaction Arrival
+mempool:
 
-- Transactions arrive following a Poisson process with a mean inter-arrival rate of 3.147 arrivals per second (interval time: 1/3.147s).
+- queue: FCFS，元素至少包含 tx_size_vb
+- mempool_current_size_vb
+- max_mempool_size_vb (整個模擬期間最大值)
 
-### Waiting Queue (Mempool) and Completed Transaction Buffer
+礦工:
 
-- Capacity: `queue_capacity`（從input讀取，預設1000000）
-- Policy: First-Come-First-Serve (FCFS)
-- **丟棄機制**：
-  - 當新交易抵達時，檢查 `num_in_mempool` 是否 < queue_capacity
-  - 如果 < queue_capacity：交易進入等待佇列 (Mempool)
-  - 如果 ≥ queue_capacity：新交易被丟棄
-    - 如果區塊 #1~#10（暖機）：丟棄但不記錄
-    - 如果區塊 #11~#154（統計）：丟棄並計入 `dropped_transactions` 統計
-- **丟棄率 (Drop Rate)**：`區塊#11~#154的丟棄交易總數 / 區塊#11~#154的到達交易總數 × 100%`
-- **區塊取交易機制**：
-  - 每個區塊最多取出 `max_transactions_per_block` 條交易
-  - 實際取出數 = min(num_in_mempool, max_transactions_per_block)
-  - 取出後，mempool數量相應減少（而非清空整個queue）
+- server_finish_time[1..1000]
+- block_start_time (當前區塊競爭開始時間)
 
-### Miner (Servers)
+統計 (僅統計區塊 #11 開始):
 
-- Number of Servers: 1000
-- Service Time of Each Server: Exponentially distributed with a mean of 600000 seconds per transaction。在取得交易後設定一個服務時間，並在該時間結束後完成交易處理。
-- **礦工狀態管理**：
-  - `num_busy_servers`：記錄目前忙碌中的礦工數量
-  - `server_state[i]`：第i個礦工的狀態（BUSY 或 IDLE）
-  - `server_finish_time[i]`：第i個礦工的完工時間（IDLE時設為無限大 1.0e+30）
-  - **狀態轉換**：
-    - BUSY → 完工時觸發Departure事件 → 轉為IDLE
-    - IDLE → 區塊生成事件時被分配新區塊 → 轉為BUSY
-  - **忙碌時間記錄**：為計算Utilization，需記錄各礦工在每個區塊時間區間內的忙碌時長（sum of (min(server_finish_time[i], block_end_time) - max(server_start_time[i], block_start_time)))）
-- Departure 事件流程：
-  1. 區塊打包與更新：
-     - 從等待佇列 (Mempool) 中取出最多 `max_transactions_per_block` 條交易
-     - 記錄取出的交易數，作為該產出區塊的「區塊交易數 (Number of Transactions in Block)」
-     - 更新mempool大小：`num_in_mempool -= transactions_in_block`
-     - **注意**：mempool不再完全清空，而是持續保留未被取出的交易，等待下一個區塊
+- total_arrived_transactions
+- dropped_transactions
+- total_completed_transactions
+- sum_block_interval
+- sum_block_tx_count
+- sum_block_size_vb
 
-  2. 統計與紀錄：
-     - 區塊數量 +1。
-     - **區塊生成時間間隔計算**：
-       - 第一個區塊：`interval[1] = block_1_time - 0`
-       - 後續區塊k（k ≥ 2）：`interval[k] = block_k_time - block_{k-1}_time`
-     - **伺服器利用率計算**：
-       $$utilization[k] = \frac{\sum_{i=1}^{1000} \text{busy\_time}[i] \text{ in block k interval}}{1000 \times block\_duration} \times 100\%$$
-       其中 `block_duration = block_k_time - block_{k-1}_time`（第一個區塊則為 `block_1_time - 0`）
-       因為所有礦工均獲得新區塊時重新設為BUSY，實際利用率應接近 100%（但非硬編碼，由模擬自然得出）
+每區塊記錄 (供輸出):
 
-  3. 全網算力重新分配 (Event Preemption)：
-     - 使用迴圈為 1000 個礦工重新且獨立地抽取下一次的服務時間（指數分布 mean=600000）。
-     - 將所有礦工狀態轉為 BUSY（開始處理下一批區塊）
-     - 找出這 1000 人中新的最早完工時間，並更新至 `time_next_event[2]`。
+- block_interval_sec
+- num_of_tx_in_block
+- block_size_vb
 
-### Block Generation
+## 4. 初始化
 
-- **區塊生成觸發機制**： 當最早完成交易處理的礦工完成區塊時，觸發區塊生成事件
-- 記錄並輸出該區塊的：交易數量、生成間隔、礦工利用率，開始累積下一個區塊。
-- **統計丟棄率**：在模擬結束時計算 `drop_rate = dropped_transactions / total_arrived_transactions × 100%`
+1. sim_time = 0
+2. time_last_event = 0
+3. last_block_time = 0
+4. block_count_total = 0
+5. mempool 為空，mempool_current_size_vb = 0
+6. 產生 time_next_arrival = sim_time + Exp(mean_interarrival)
+7. 對 1000 位礦工各自產生 finish time:
+   - server_finish_time[i] = sim_time + Exp(mean_service_time)
+8. time_next_departure = min(server_finish_time)
 
-## 輸入(mmnl_pow.in)
+說明:
 
-格式: `mean_interarrival mean_service queue_capacity max_transactions_per_block num_blocks_to_simulate`
+- 冷啟動允許空區塊，符合礦工持續競爭的設定。
 
-例如: `0.3177 600000 1000000 3000 2016`
+## 5. 事件推進主迴圈
 
-- Mean Inter-arrival Time: 0.3177 (seconds per transaction, 相當於 1/3.147)
-- Mean Service Time per Server: 600000 (seconds)
-- Queue Capacity (Mempool): 1000000 (transactions, 可動態調整)
-- Max Transactions per Block: 3000 (交易上限)
-- Num Blocks to Simulate: 2016 (統計區塊數，不含暖機)
+當 block_count_total < total_blocks 時重複:
 
-## 輸出檔案
+1. 取下一事件時間
+   - next_time = min(time_next_arrival, time_next_departure)
+   - sim_time = next_time
 
-統計資訊將輸出至以下四個檔案：
+2. 更新時間面積統計
+   - time_since_last = sim_time - time_last_event
+   - time_last_event = sim_time
 
-**區塊編號約定**（以輸入值2016為例）：
-- 實際模擬區塊編號：#1~#2026
-- 暖機區塊：#1~#10 (自動添加，不輸出)
-- 統計區塊：#11~#2026，在 .out 檔案中重新編號為 1~2016
-- **mmnl_pow.out**：只包含暖機後10個區塊的詳細資訊 + 統計摘要
-- **num_transactions_block.out、block_generation_interval.out、utilization.out**：只包含統計區塊 1~2016
+3. 分流處理
+   - 若 time_next_arrival <= time_next_departure，處理 Arrival
+   - 否則處理 Departure
 
-### mmnl_pow.out (主報告檔案)
+備註:
 
-格式進了暖機10區塊後漄的區塊資訊，加上統計摘要：
-```
-Bitcoin Network Simulation (MMnL Model)
+- 需固定 tie-break 規則避免非決定性，建議 Arrival 優先。
 
-Mean inter-arrival time: 0.318 seconds
-Mean service time: 600000.000 seconds
-Number of servers (miners): 1000
-Number of blocks to simulate: 2016
-Mempool capacity: 1000000
+## 6. Arrival 事件
 
-#11, Transactions: 3000, Interval: 1359.6 s, Utilization: 99.9%
-#12, Transactions: 3000, Interval: 1380.0 s, Utilization: 99.7%
-...
-#2026, Transactions: 6, Interval: 1.8 s, Utilization: 100.0%
+1. 安排下一次到達:
+   - time_next_arrival = sim_time + Exp(mean_interarrival)
 
-===== SIMULATION SUMMARY =====
+2. 產生交易大小:
+   - tx_size_vb = generate_dynamic_tx_size()
 
-Total blocks generated: 2016
-Total transactions completed: XXXX
-Avg. Number of Transactions/Block: 1660.3
-Mean Block Generation Interval: 528.2 seconds
-Mean Utilization of Servers: 99.9%
-Total simulation time: XXXXXX seconds
-Max Mempool Size: 1000000
+3. 若目前已進入統計區塊 (block_count_total >= warmup_blocks):
+   - total_arrived_transactions += 1
 
-Transaction Statistics:
-Total arrived transactions: XXXXX
-Dropped transactions: XXXX
-Drop rate: X.XXXXXX%
-```
+4. 檢查容量後入隊或丟棄:
+   - 若 mempool_current_size_vb + tx_size_vb <= queue_capacity:
+     - queue.push(tx_size_vb)
+     - mempool_current_size_vb += tx_size_vb
+     - max_mempool_size_vb = max(max_mempool_size_vb, mempool_current_size_vb)
+   - 否則:
+     - 若在統計期，dropped_transactions += 1
 
-**詳細說明**：
+## 7. Departure 事件 (區塊生成)
 
-- mmnl_pow.out 中僅輸出暖機後的區塊 (#11 起)
-- SIMULATION SUMMARY 中的所有統計數據僅計算統計區塊 (#11~#N+10) 的數據
-- Max Mempool Size 是整個模擬中 mempool 超過暖機後的最大優化值
+1. 計算區塊間隔:
+   - block_interval_sec = sim_time - last_block_time
+   - last_block_time = sim_time
 
-### num_transactions_block.out (統計區塊1~N)
+2. 依 FCFS 打包交易，受 max_block_size 限制:
+   - tx_count = 0
+   - block_size_vb = 0
+   - while queue 非空:
+     - next_tx = queue.front()
+     - 若 block_size_vb + next_tx > max_block_size: break
+     - queue.pop()
+     - tx_count += 1
+     - block_size_vb += next_tx
+     - mempool_current_size_vb -= next_tx
 
-格式: `block_number, number_of_transactions_in_block`  
-example:
-```
-1, 3000
-2, 3000
-3, 2618
-4, 784
-5, 2283
+3. 區塊完成:
+   - block_count_total += 1
+
+4. 若此區塊屬統計期 (block_count_total > warmup_blocks):
+
+   - stat_block_no = block_count_total - warmup_blocks
+   - 紀錄此區塊輸出資料
+   - total_completed_transactions += tx_count
+   - sum_block_interval += block_interval_sec
+   - sum_block_tx_count += tx_count
+   - sum_block_size_vb += block_size_vb
+
+5. 重新分配全網算力 (preemption):
+
+- 對所有礦工重新抽 Exp(mean_service_time)
+- block_start_time = sim_time
+- server_finish_time[i] = sim_time + Exp(mean_service_time)
+- time_next_departure = min(server_finish_time)
+
+## 8. 交易大小生成
+
+建議實作:
+
+- 以 GMM + Box-Muller 生成多峰分布
+- 強制下限 60 vB
+
+參考函式:
+
+```python
+def generate_dynamic_tx_size():
+    p = random.random()
+    if p < 0.60:
+        size = box_muller_normal(mu=141.0, sigma=2.0)
+    elif p < 0.85:
+        size = box_muller_normal(mu=226.0, sigma=10.0)
+    else:
+        size = box_muller_normal(mu=370.0, sigma=40.0)
+    return max(60, int(round(size)))
 ```
 
-### block_generation_interval.out (統計區塊1~N)
+## 9. 輸出
 
-格式: `block_number, block_generation_interval(in_seconds)`  
-example:
-```
-1, 1359.6
-2, 1380.0
-3, 31.8
-4, 256.1
-5, 754.4
-```
+### 9.1 output.txt (只含統計區塊 1..N)
 
-### utilization.out (統計區塊1~N)
+每行格式:
+block_number, block_interval, num_of_tx_in_block, block_size
 
-格式: `block_number, utilization_percentage`  
-example:
-```
-1, 99.87
-2, 99.69
-3, 99.99
-4, 99.94
-5, 99.93
-```
+欄位定義:
 
-## print
+- block_number: 統計區塊編號 1..N
+- block_interval: 秒
+- num_of_tx_in_block: 該區塊交易筆數
+- block_size: 輸出 MiB，小數點 2 位
 
-### 模擬中逐個區塊完成時，印出該區塊的資訊 (所有154個區塊)
+單位定義:
+- 內部計算使用 vB
+- 對外輸出使用 MiB (2^20)
 
-- Block Number (#1 ~ #154，含暖機塊)
-- Number of Transactions in Block
-- Block Generation Interval (in seconds)
-- Utilization of Servers for Block (in percentage)
+轉換:
 
-格式: `#X, Transactions: Y, Interval: Z s, Utilization: W%`
+- block_size_mib = block_size_vb / 1048576.0
 
-例如：
-```
-#1, Transactions: 3000, Interval: 1109.9 s, Utilization: 99.8%
-#2, Transactions: 3000, Interval: 1113.2 s, Utilization: 99.9%
-...
-#10, Transactions: 1526, Interval: 57.0 s, Utilization: 100.0%
-#11, Transactions: 3000, Interval: 1359.6 s, Utilization: 99.9%
-...
-#154, Transactions: 6, Interval: 1.8 s, Utilization: 100.0%
-```
+範例:
+1, 600, 1753, 1.06
+2, 355, 976, 0.98
 
-### 模擬結束後，印出整體統計資訊
+### 9.2 mmnl_pow.out
+
+內容:
+
+- 暖機後區塊逐塊資訊
+- 總結統計
+
+建議統計公式 (統計期 1..N):
+
+- avg_tx_per_block = sum_block_tx_count / N
+- mean_block_interval = sum_block_interval / N
+- mean_block_size_mib = (sum_block_size_vb / N) / 1048576.0
+- drop_rate_percent = (dropped_transactions / total_arrived_transactions) * 100
+
+安全防呆:
+
+- 若 total_arrived_transactions = 0，drop_rate_percent 定義為 0
+
+## 10. 列印規範
+
+模擬中每個已完成區塊都可印出 (不含暖機):  
+#X, Transactions: Y, Interval: Z s, Block Size: W MiB
+
+模擬結束印出統計期摘要:
 
 - Avg. Number of Transactions/Block
 - Mean Block Generation Interval
-- Mean Utilization of Servers
-- **Transaction Statistics**:
-  - Total arrived transactions
-  - Dropped transactions
-  - Drop rate (percentage)
+- Mean Block Size
+- Total arrived transactions
+- Dropped transactions
+- Drop rate
+
+## 11. 實作一致性檢查清單
+
+1. 不可使用固定時間步進輪詢，必須使用 next-event。
+2. 容量檢查必須是大小相加判斷:
+mempool_current_size_vb + tx_size_vb <= queue_capacity
+3. 區塊打包必須是前端逐筆累加判斷:
+block_size_vb + next_tx_size <= max_block_size
+4. 不可拆分交易。
+5. 暖機區塊不納入統計。
+6. block_count_total 與統計編號 stat_block_no 的換算必須一致。
+7. 單位需一致:
+   計算使用 vB，輸出 block_size 轉 MiB
+8. tie-break 規則固定 (建議 Arrival 優先)。
