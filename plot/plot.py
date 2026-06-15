@@ -6,10 +6,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-def read_out_file(file_path: Path) -> tuple[list[int], list[float]]:
-	"""Read lines like: block_number, value"""
+def read_out_file(
+	file_path: Path,
+) -> tuple[list[int], list[int], list[int], list[float]]:
+	"""Read lines like: block_number, block_interval, num_of_tx_in_block, block_size"""
 	blocks: list[int] = []
-	values: list[float] = []
+	intervals: list[int] = []
+	tx_counts: list[int] = []
+	sizes: list[float] = []
 
 	with file_path.open("r", encoding="utf-8") as f:
 		for raw_line in f:
@@ -18,15 +22,15 @@ def read_out_file(file_path: Path) -> tuple[list[int], list[float]]:
 				continue
 
 			parts = [p.strip() for p in line.split(",")]
-			if len(parts) != 2:
+			if len(parts) != 4:
 				raise ValueError(f"Invalid format in {file_path}: {line}")
 
-			block = int(parts[0])
-			value = float(parts[1])
-			blocks.append(block)
-			values.append(value)
+			blocks.append(int(parts[0]))
+			intervals.append(int(parts[1]))
+			tx_counts.append(int(parts[2]))
+			sizes.append(float(parts[3]))
 
-	return blocks, values
+	return blocks, intervals, tx_counts, sizes
 
 
 def make_ticks(blocks: list[int], count: int = 12) -> list[int]:
@@ -61,8 +65,10 @@ def plot_bar(
 
 	ticks = make_ticks(blocks, count=12)
 	ax.set_xticks(ticks)
-	ax.tick_params(axis="x", labelsize=9)
+	ax.tick_params(axis="x", labelsize=9, rotation=45)
 	ax.tick_params(axis="y", labelsize=10)
+	for label in ax.get_xticklabels():
+		label.set_ha("right")
 
 	ax.grid(axis="y", color="#d9d9d9", linewidth=0.8)
 	ax.set_axisbelow(True)
@@ -75,13 +81,13 @@ def main() -> None:
 	script_dir = Path(__file__).resolve().parent
 
 	parser = argparse.ArgumentParser(
-		description="Plot Plan A simulation outputs into PNG charts."
+		description="Plot block data from get_block_data output into PNG charts."
 	)
 	parser.add_argument(
-		"--input-dir",
+		"--input",
 		type=Path,
-		default=(script_dir.parent / "plan_A"),
-		help="Directory containing *.out files (default: ../plan_A)",
+		default=(script_dir.parent / "output.txt"),
+		help="Path to output.txt (default: ../output.txt)",
 	)
 	parser.add_argument(
 		"--output-dir",
@@ -91,45 +97,22 @@ def main() -> None:
 	)
 	args = parser.parse_args()
 
-	input_dir = args.input_dir.resolve()
+	input_file = args.input.resolve()
 	output_dir = args.output_dir.resolve()
 	output_dir.mkdir(parents=True, exist_ok=True)
 
-	files_to_plot = [
-		(
-			"num_transactions_block.out",
-			"Number of Transactions/Block",
-			"Transactions",
-			"num_transactions_block.png",
-		),
-		(
-			"block_generation_interval.out",
-			"Block Generation Interval",
-			"Interval (s)",
-			"block_generation_interval.png",
-		),
-		(
-			"utilization.out",
-			"Utilization of Servers",
-			"Utilization (%)",
-			"utilization.png",
-		),
+	if not input_file.exists():
+		raise FileNotFoundError(f"Input file not found: {input_file}")
+
+	blocks, intervals, tx_counts, sizes = read_out_file(input_file)
+
+	charts = [
+		(intervals, "Block Generation Interval", "Interval (s)", "block_generation_interval.png"),
+		(tx_counts, "Number of Transactions/Block", "Transactions", "num_transactions_block.png"),
+		(sizes,     "Block Size",                  "Size (MB)",    "block_size.png"),
 	]
 
-	for file_name, title, y_label, out_name in files_to_plot:
-		file_path = input_dir / file_name
-		if not file_path.exists():
-			raise FileNotFoundError(f"Input file not found: {file_path}")
-
-		blocks, values = read_out_file(file_path)
-		
-		# --- 新增的轉換邏輯開始 ---
-		# 如果處理的檔案是區塊生成間隔，則將數值從秒除以 60 轉換為分鐘，並修改 Y 軸標籤
-		if file_name == "block_generation_interval.out":
-			values = [v / 60.0 for v in values]
-			y_label = "Interval (min)"
-		# --- 新增的轉換邏輯結束 ---
-
+	for values, title, y_label, out_name in charts:
 		output_path = output_dir / out_name
 		plot_bar(blocks, values, title, y_label, output_path)
 		print(f"Generated: {output_path}")
