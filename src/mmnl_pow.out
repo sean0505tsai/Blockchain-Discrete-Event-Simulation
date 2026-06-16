@@ -1,0 +1,169 @@
+Bitcoin Network Simulation (MMnL Model)
+
+Mean inter-arrival time: 0.317700 seconds
+Mean service time: 600000.000 seconds
+Number of servers (miners): 1000
+Number of blocks to simulate: 144
+Mempool capacity: 300000000 vB
+Max block size: 1000000 vB
+
+#1, Transactions: 2958, Interval: 1359.6 s, Block Size: 0.95 MiB
+#2, Transactions: 2955, Interval: 1380.0 s, Block Size: 0.95 MiB
+#3, Transactions: 2706, Interval: 31.8 s, Block Size: 0.86 MiB
+#4, Transactions: 782, Interval: 256.1 s, Block Size: 0.25 MiB
+#5, Transactions: 2279, Interval: 754.4 s, Block Size: 0.74 MiB
+#6, Transactions: 2987, Interval: 1113.2 s, Block Size: 0.95 MiB
+#7, Transactions: 2977, Interval: 926.9 s, Block Size: 0.95 MiB
+#8, Transactions: 832, Interval: 130.1 s, Block Size: 0.27 MiB
+#9, Transactions: 964, Interval: 323.2 s, Block Size: 0.30 MiB
+#10, Transactions: 1080, Interval: 351.2 s, Block Size: 0.35 MiB
+#11, Transactions: 855, Interval: 267.0 s, Block Size: 0.28 MiB
+#12, Transactions: 2971, Interval: 947.1 s, Block Size: 0.95 MiB
+#13, Transactions: 368, Interval: 102.8 s, Block Size: 0.12 MiB
+#14, Transactions: 311, Interval: 103.6 s, Block Size: 0.10 MiB
+#15, Transactions: 1086, Interval: 344.7 s, Block Size: 0.35 MiB
+#16, Transactions: 2937, Interval: 1076.1 s, Block Size: 0.95 MiB
+#17, Transactions: 2962, Interval: 1245.5 s, Block Size: 0.95 MiB
+#18, Transactions: 2998, Interval: 970.2 s, Block Size: 0.95 MiB
+#19, Transactions: 1756, Interval: 111.3 s, Block Size: 0.56 MiB
+#20, Transactions: 503, Interval: 148.4 s, Block Size: 0.16 MiB
+#21, Transactions: 1064, Interval: 357.8 s, Block Size: 0.35 MiB
+#22, Transactions: 720, Interval: 232.9 s, Block Size: 0.23 MiB
+#23, Transactions: 2248, Interval: 728.1 s, Block Size: 0.73 MiB
+#24, Transactions: 932, Interval: 307.7 s, Block Size: 0.30 MiB
+#25, Transactions: 2963, Interval: 1272.1 s, Block Size: 0.95 MiB
+#26, Transactions: 2959, Interval: 1797.2 s, Block Size: 0.95 MiB
+#27, Transactions: 2979, Interval: 167.0 s, Block Size: 0.95 MiB
+#28, Transactions: 2990, Interval: 1200.5 s, Block Size: 0.95 MiB
+#29, Transactions: 1999, Interval: 55.1 s, Block Size: 0.64 MiB
+#30, Transactions: 112, Interval: 33.3 s, Block Size: 0.04 MiB
+#31, Transactions: 2337, Interval: 742.1 s, Block Size: 0.74 MiB
+#32, Transactions: 2987, Interval: 1320.0 s, Block Size: 0.95 MiB
+#33, Transactions: 1872, Interval: 225.3 s, Block Size: 0.61 MiB
+#34, Transactions: 324, Interval: 104.5 s, Block Size: 0.10 MiB
+#35, Transactions: 2980, Interval: 3613.7 s, Block Size: 0.95 MiB
+#36, Transactions: 2967, Interval: 322.0 s, Block Size: 0.95 MiB
+#37, Transactions: 2990, Interval: 272.8 s, Block Size: 0.95 MiB
+#38, Transactions: 2942, Interval: 585.2 s, Block Size: 0.95 MiB
+#39, Transactions: 3019, Interval: 1927.4 s, Block Size: 0.95 MiB
+#40, Transactions: 2991, Interval: 480.4 s, Block Size: 0.95 MiB
+#41, Transactions: 2960, Interval: 401.1 s, Block Size: 0.95 MiB
+#42, Transactions: 2904, Interval: 791.2 s, Block Size: 0.95 MiB
+#43, Transactions: 2733, Interval: 37.6 s, Block Size: 0.88 MiB
+#44, Transactions: 2951, Interval: 1048.9 s, Block Size: 0.95 MiB
+#45, Transactions: 374, Interval: 4.9 s, Block Size: 0.12 MiB
+#46, Transactions: 785, Interval: 257.4 s, Block Size: 0.25 MiB
+#47, Transactions: 1843, Interval: 573.0 s, Block Size: 0.60 MiB
+#48, Transactions: 1080, Interval: 347.0 s, Block Size: 0.34 MiB
+#49, Transactions: 162, Interval: 52.3 s, Block Size: 0.05 MiB
+#50, Transactions: 453, Interval: 136.1 s, Block Size: 0.14 MiB
+#51, Transactions: 2742, Interval: 894.6 s, Block Size: 0.88 MiB
+#52, Transactions: 535, Interval: 157.6 s, Block Size: 0.17 MiB
+#53, Transactions: 387, Interval: 122.5 s, Block Size: 0.12 MiB
+#54, Transactions: 496, Interval: 170.5 s, Block Size: 0.16 MiB
+#55, Transactions: 2221, Interval: 694.1 s, Block Size: 0.71 MiB
+#56, Transactions: 2985, Interval: 949.5 s, Block Size: 0.95 MiB
+#57, Transactions: 63, Interval: 2.7 s, Block Size: 0.02 MiB
+#58, Transactions: 535, Interval: 173.4 s, Block Size: 0.17 MiB
+#59, Transactions: 2883, Interval: 908.7 s, Block Size: 0.92 MiB
+#60, Transactions: 2113, Interval: 665.4 s, Block Size: 0.68 MiB
+#61, Transactions: 292, Interval: 93.9 s, Block Size: 0.09 MiB
+#62, Transactions: 1330, Interval: 417.5 s, Block Size: 0.42 MiB
+#63, Transactions: 2529, Interval: 790.1 s, Block Size: 0.81 MiB
+#64, Transactions: 513, Interval: 163.9 s, Block Size: 0.16 MiB
+#65, Transactions: 2214, Interval: 684.8 s, Block Size: 0.72 MiB
+#66, Transactions: 573, Interval: 187.6 s, Block Size: 0.19 MiB
+#67, Transactions: 2949, Interval: 1083.1 s, Block Size: 0.95 MiB
+#68, Transactions: 1023, Interval: 195.6 s, Block Size: 0.33 MiB
+#69, Transactions: 894, Interval: 284.1 s, Block Size: 0.28 MiB
+#70, Transactions: 2994, Interval: 1775.4 s, Block Size: 0.95 MiB
+#71, Transactions: 2989, Interval: 769.1 s, Block Size: 0.95 MiB
+#72, Transactions: 2969, Interval: 545.5 s, Block Size: 0.95 MiB
+#73, Transactions: 2934, Interval: 839.1 s, Block Size: 0.95 MiB
+#74, Transactions: 765, Interval: 85.5 s, Block Size: 0.25 MiB
+#75, Transactions: 509, Interval: 169.0 s, Block Size: 0.16 MiB
+#76, Transactions: 1078, Interval: 330.0 s, Block Size: 0.35 MiB
+#77, Transactions: 72, Interval: 21.9 s, Block Size: 0.02 MiB
+#78, Transactions: 41, Interval: 8.9 s, Block Size: 0.01 MiB
+#79, Transactions: 2304, Interval: 722.5 s, Block Size: 0.75 MiB
+#80, Transactions: 207, Interval: 65.9 s, Block Size: 0.07 MiB
+#81, Transactions: 795, Interval: 236.4 s, Block Size: 0.25 MiB
+#82, Transactions: 470, Interval: 151.2 s, Block Size: 0.15 MiB
+#83, Transactions: 561, Interval: 182.0 s, Block Size: 0.18 MiB
+#84, Transactions: 55, Interval: 17.5 s, Block Size: 0.02 MiB
+#85, Transactions: 858, Interval: 260.8 s, Block Size: 0.28 MiB
+#86, Transactions: 629, Interval: 200.2 s, Block Size: 0.20 MiB
+#87, Transactions: 2996, Interval: 1520.3 s, Block Size: 0.95 MiB
+#88, Transactions: 2798, Interval: 286.8 s, Block Size: 0.90 MiB
+#89, Transactions: 257, Interval: 84.2 s, Block Size: 0.08 MiB
+#90, Transactions: 552, Interval: 165.9 s, Block Size: 0.18 MiB
+#91, Transactions: 2949, Interval: 1231.4 s, Block Size: 0.95 MiB
+#92, Transactions: 2994, Interval: 698.4 s, Block Size: 0.95 MiB
+#93, Transactions: 2985, Interval: 1512.8 s, Block Size: 0.95 MiB
+#94, Transactions: 2177, Interval: 82.8 s, Block Size: 0.71 MiB
+#95, Transactions: 1553, Interval: 481.5 s, Block Size: 0.50 MiB
+#96, Transactions: 1119, Interval: 346.0 s, Block Size: 0.36 MiB
+#97, Transactions: 793, Interval: 232.5 s, Block Size: 0.25 MiB
+#98, Transactions: 134, Interval: 52.2 s, Block Size: 0.04 MiB
+#99, Transactions: 1259, Interval: 396.0 s, Block Size: 0.39 MiB
+#100, Transactions: 1489, Interval: 491.0 s, Block Size: 0.47 MiB
+#101, Transactions: 101, Interval: 31.3 s, Block Size: 0.03 MiB
+#102, Transactions: 1048, Interval: 338.8 s, Block Size: 0.33 MiB
+#103, Transactions: 1393, Interval: 430.8 s, Block Size: 0.45 MiB
+#104, Transactions: 68, Interval: 18.6 s, Block Size: 0.02 MiB
+#105, Transactions: 54, Interval: 17.3 s, Block Size: 0.02 MiB
+#106, Transactions: 1609, Interval: 523.3 s, Block Size: 0.51 MiB
+#107, Transactions: 2958, Interval: 1210.9 s, Block Size: 0.95 MiB
+#108, Transactions: 1776, Interval: 287.2 s, Block Size: 0.57 MiB
+#109, Transactions: 1739, Interval: 544.6 s, Block Size: 0.56 MiB
+#110, Transactions: 1798, Interval: 548.6 s, Block Size: 0.57 MiB
+#111, Transactions: 535, Interval: 160.5 s, Block Size: 0.18 MiB
+#112, Transactions: 774, Interval: 265.5 s, Block Size: 0.24 MiB
+#113, Transactions: 1516, Interval: 478.1 s, Block Size: 0.49 MiB
+#114, Transactions: 5, Interval: 1.9 s, Block Size: 0.00 MiB
+#115, Transactions: 571, Interval: 189.8 s, Block Size: 0.18 MiB
+#116, Transactions: 2970, Interval: 1318.8 s, Block Size: 0.95 MiB
+#117, Transactions: 1074, Interval: 10.1 s, Block Size: 0.34 MiB
+#118, Transactions: 2986, Interval: 1243.9 s, Block Size: 0.95 MiB
+#119, Transactions: 1435, Interval: 170.1 s, Block Size: 0.47 MiB
+#120, Transactions: 1797, Interval: 570.0 s, Block Size: 0.58 MiB
+#121, Transactions: 1091, Interval: 331.5 s, Block Size: 0.36 MiB
+#122, Transactions: 1978, Interval: 621.2 s, Block Size: 0.64 MiB
+#123, Transactions: 590, Interval: 193.3 s, Block Size: 0.19 MiB
+#124, Transactions: 1907, Interval: 581.4 s, Block Size: 0.62 MiB
+#125, Transactions: 407, Interval: 130.5 s, Block Size: 0.13 MiB
+#126, Transactions: 1682, Interval: 521.6 s, Block Size: 0.54 MiB
+#127, Transactions: 1065, Interval: 330.5 s, Block Size: 0.34 MiB
+#128, Transactions: 2939, Interval: 916.7 s, Block Size: 0.95 MiB
+#129, Transactions: 460, Interval: 145.7 s, Block Size: 0.15 MiB
+#130, Transactions: 297, Interval: 82.3 s, Block Size: 0.10 MiB
+#131, Transactions: 952, Interval: 301.4 s, Block Size: 0.30 MiB
+#132, Transactions: 468, Interval: 153.3 s, Block Size: 0.15 MiB
+#133, Transactions: 1519, Interval: 473.0 s, Block Size: 0.48 MiB
+#134, Transactions: 418, Interval: 141.9 s, Block Size: 0.14 MiB
+#135, Transactions: 936, Interval: 297.9 s, Block Size: 0.29 MiB
+#136, Transactions: 1172, Interval: 369.0 s, Block Size: 0.37 MiB
+#137, Transactions: 2920, Interval: 1587.6 s, Block Size: 0.95 MiB
+#138, Transactions: 2465, Interval: 128.9 s, Block Size: 0.78 MiB
+#139, Transactions: 2972, Interval: 1024.5 s, Block Size: 0.95 MiB
+#140, Transactions: 1168, Interval: 296.7 s, Block Size: 0.37 MiB
+#141, Transactions: 2970, Interval: 2223.5 s, Block Size: 0.95 MiB
+#142, Transactions: 2971, Interval: 551.6 s, Block Size: 0.95 MiB
+#143, Transactions: 2967, Interval: 82.8 s, Block Size: 0.95 MiB
+#144, Transactions: 613, Interval: 168.5 s, Block Size: 0.20 MiB
+
+
+===== SIMULATION SUMMARY =====
+
+Total blocks generated: 144
+Total transactions completed: 232583
+Avg. Number of Transactions/Block: 1615.16
+Mean Block Generation Interval: 513.58 seconds
+Mean Block Size: 0.5187 MiB
+Total simulation time: 78498.47 seconds
+Max Mempool Size: 3825139 vB
+
+Transaction Statistics:
+Total arrived transactions: 232583
+Dropped transactions: 0
+Drop rate: 0.000000%
