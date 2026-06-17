@@ -194,7 +194,7 @@ block_number, block_interval, num_of_tx_in_block, block_size
 ```
 
 **注意事項**：
-- 需要網路連接以訪問 Mempool.space API
+- 需要網路連接以存取 Mempool.space API
 - API 可能有速率限制，爬蟲內置了瀏覽器偽裝頭以避免被阻擋
 - 爬取大量區塊可能耗時較長，請耐心等待
 
