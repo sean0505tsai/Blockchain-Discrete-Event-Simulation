@@ -86,8 +86,8 @@ def main() -> None:
 	parser.add_argument(
 		"--input",
 		type=Path,
-		default=(script_dir.parent / "output.txt"),
-		help="Path to output.txt (default: ../output.txt)",
+		default=(script_dir.parent / "outputs" / "output.txt"),
+		help="Path to output.txt (default: ../outputs/output.txt)",
 	)
 	parser.add_argument(
 		"--output-dir",

@@ -5,7 +5,7 @@ import requests
 API_BASE = "https://mempool.space/api"
 START_HEIGHT = 550370
 END_HEIGHT = 550514
-OUTPUT_FILE = Path(__file__).resolve().parents[1] / "output_real_bitcoin.txt"
+OUTPUT_FILE = Path(__file__).resolve().parents[1] / "outputs" / "output_real_bitcoin.txt"
 
 
 def get_headers():

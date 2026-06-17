@@ -110,8 +110,8 @@ static void cleanup_and_exit(int code) {
 
 int main(void) {
     infile = fopen("mmnl_pow.in", "r");
-    outfile_report = fopen("mmnl_pow.out", "w");
-    outfile_data = fopen("output.txt", "w");
+    outfile_report = fopen("../outputs/mmnl_pow.out", "w");
+    outfile_data = fopen("../outputs/output.txt", "w");
 
     if (infile == NULL || outfile_report == NULL || outfile_data == NULL) {
         fprintf(stderr, "Error opening required files.\n");

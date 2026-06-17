@@ -59,5 +59,5 @@ def analyze_bitcoin_txt(file_path):
 # --- 執行統計 ---
 if __name__ == "__main__":
     # 如果您的 txt 檔案放在不同目錄，可以修改為絕對路徑如 r"C:\path\to\your_file.txt"
-    target_file = "../../output_real_bitcoin.txt"
+    target_file = "../outputs/output_real_bitcoin.txt"
     analyze_bitcoin_txt(target_file)
